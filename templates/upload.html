@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENS to VTK Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2 {
+            font-weight: 700;
+            color: #1a1a1a;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        h2 {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        form, .instructions {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .instructions {
+            margin-bottom: 30px;
+        }
+        .instructions ol {
+            padding-left: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: 700;
+            color: #4a4a4a;
+        }
+        input[type="file"],
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+        }
+        input[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 30px;
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #333;
+        }
+        .note {
+            font-style: italic;
+            color: #666;
+            margin-top: 20px;
+            text-align: center;
+        }
+        #variable_names {
+            margin-top: 20px;
+        }
+        .variable-input {
+            margin-bottom: 15px;
+        }
+        .variable-label {
+            font-weight: 400;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .flashes {
+            list-style-type: none;
+            padding: 0;
+        }
+        .flashes li {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+    </style>
+    <script>
+        function updateVariableInputs() {
+            var numColumns = document.getElementById('num_columns').value;
+            var variableNamesDiv = document.getElementById('variable_names');
+            variableNamesDiv.innerHTML = '';
+            for (var i = 0; i < numColumns; i++) {
+                var container = document.createElement('div');
+                container.className = 'variable-input';
+                
+                var label = document.createElement('div');
+                label.className = 'variable-label';
+                label.textContent = 'Choose a variable name for column ' + (i + 1);
+                container.appendChild(label);
+                
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'var_name_' + i;
+                input.placeholder = 'Variable ' + (i + 1) + ' name';
+                input.required = true;
+                container.appendChild(input);
+                
+                variableNamesDiv.appendChild(container);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>ENS to VTK Converter</h1>
+    <h2>Convert Ensight (.ens) files to VTK (.vtk) format</h2>
+    
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Upload one .case file containing the simulation setup.</li>
+            <li>Upload one .geo file containing the geometry information.</li>
+            <li>Upload one or more .ens files containing the simulation data.</li>
+            <li>Specify the number of data columns in your .ens files.</li>
+            <li>Provide names for each data column (variable).</li>
+            <li>Click "Convert" to process your files.</li>
+            <li>Download the resulting .vtk files in a zip archive.</li>
+        </ol>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <form method="post" enctype="multipart/form-data">
+        <label for="case_file">Case File (.case):</label>
+        <input type="file" name="case_file" id="case_file" accept=".case" required>
+        
+        <label for="geo_file">Geometry File (.geo):</label>
+        <input type="file" name="geo_file" id="geo_file" accept=".geo" required>
+        
+        <label for="ens_files">Ensight Data Files (.ens):</label>
+        <input type="file" name="ens_files" id="ens_files" accept=".ens" multiple required>
+        
+        <label for="num_columns">Number of columns in ENS files:</label>
+        <input type="number" name="num_columns" id="num_columns" min="1" value="1" required onchange="updateVariableInputs()">
+        
+        <div id="variable_names">
+            <div class="variable-input">
+                <div class="variable-label">Choose a variable name for column 1</div>
+                <input type="text" name="var_name_0" placeholder="Variable 1 name" required>
+            </div>
+        </div>
+        
+        <input type="submit" value="Convert">
+    </form>
+    <p class="note">Note: Ensure all files are in the correct Ensight format before uploading.</p>
+</body>
+</html>
