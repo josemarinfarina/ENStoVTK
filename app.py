@@ -7,9 +7,8 @@ import zipfile
 import shutil
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'  # Necesario para usar flash
+app.secret_key = 'your_secret_key_here'
 
-# Configuración
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'outputs'
 ALLOWED_EXTENSIONS = {'ens', 'case', 'geo'}
@@ -17,7 +16,6 @@ ALLOWED_EXTENSIONS = {'ens', 'case', 'geo'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
 
-# Asegúrate de que las carpetas existan
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
@@ -29,7 +27,6 @@ def upload_file():
     if request.method == 'POST':
         input_files = []
         
-        # Handle .case and .geo files
         for file_key in ['case_file', 'geo_file']:
             if file_key not in request.files:
                 flash(f'No {file_key.split("_")[0].upper()} file part')
@@ -44,7 +41,6 @@ def upload_file():
                 file.save(file_path)
                 input_files.append(file_path)
         
-        # Handle multiple .ens files
         if 'ens_files' not in request.files:
             flash('No ENS files part')
             return render_template('upload.html')
@@ -71,7 +67,6 @@ def upload_file():
             os.makedirs(output_dir, exist_ok=True)
             conversion_result = ens_to_vtk(input_files, output_dir, num_columns, variable_names)
             if conversion_result:
-                # Create a ZIP file with all VTU files
                 zip_filename = "vtk_files.zip"
                 zip_path = os.path.join(app.config['OUTPUT_FOLDER'], zip_filename)
                 with zipfile.ZipFile(zip_path, 'w') as zipf:
@@ -84,7 +79,6 @@ def upload_file():
         except Exception as e:
             flash(f'Error during conversion: {str(e)}')
         finally:
-            # Limpieza de archivos
             for file in input_files:
                 os.remove(file)
             shutil.rmtree(output_dir, ignore_errors=True)
